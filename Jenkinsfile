@@ -88,13 +88,19 @@ pipeline {
         // ─── Stage 5: Build Docker Image ─────────────────────────────
         stage('Build Docker Image') {
             steps {
-                sh """
-                    docker build \
-                      --no-cache \
+                script {
+                    // 🔍 DEBUG: check files in workspace
+                    sh 'pwd'
+                    sh 'ls -l'
+        
+                    // 🚀 Actual build
+                    sh """
+                    docker build --no-cache \
                       --label git-commit=${GIT_COMMIT} \
                       -t ${FULL_IMAGE} \
                       -f Dockerfile .
-                """
+                    """
+                }
             }
         }
 
