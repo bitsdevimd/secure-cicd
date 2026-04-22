@@ -108,8 +108,10 @@ pipeline {
         stage('Image Vulnerability Scan') {
             steps {
                 sh """
+                    # Code 1 exits if vulnerabilities found
+                    # Code 0 allows pipeline to continue
                     trivy image \
-                      --exit-code 0 \   # Code 1 exits if Trivy found vulnerabilities / Code 0 to allow pipeline to continue
+                      --exit-code 0 \
                       --severity CRITICAL,HIGH \
                       --format table \
                       --output trivy-report.txt \
