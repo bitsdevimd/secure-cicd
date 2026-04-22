@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // ── Local registry (minikube addon) replaces AWS ECR ──────────
-        REGISTRY      = 'localhost:5000'
+        REGISTRY      = 'host.docker.internal:5000'
         IMAGE_NAME    = 'secure-app'
 
         // ── SonarQube running as Docker container on host ──────────────
