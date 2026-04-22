@@ -67,15 +67,16 @@ pipeline {
         // ─── Stage 4: Secret Detection (Gitleaks via Docker) ─────────
         stage('Secret Detection') {
             steps {
-                sh """
+                    sh """
                     docker run --rm \
-                      -v \${WORKSPACE}:/path \
-                      zricethezav/gitleaks:latest \
-                      detect --source /path \
+                      -v ${WORKSPACE}:/path \
+                      zricethezav/gitleaks:latest detect \
+                      --source /path \
+                      --no-git \
                       --report-format sarif \
                       --report-path /path/gitleaks-report.sarif \
                       --exit-code 1
-                """
+                    """
             }
             post {
                 always {
