@@ -1,0 +1,170 @@
+# ─── Namespace ───────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secure-app
+  labels:
+    env: local-dev
+    managed-by: jenkins-cicd
+---
+# ─── ServiceAccount ───────────────────────────────────────────────────────────
+# NOTE: No IRSA annotation here — that is AWS-only
+# Locally, the ServiceAccount is used purely for RBAC scoping
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: secure-app-sa
+  namespace: secure-app
+automountServiceAccountToken: false
+---
+# ─── Deployment ───────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-app
+  namespace: secure-app
+  labels:
+    app: secure-app
+    version: "1.0"
+spec:
+  replicas: 1                  # Single replica for local — saves resources
+  selector:
+    matchLabels:
+      app: secure-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: secure-app
+    spec:
+      serviceAccountName: secure-app-sa
+
+      # ── Pod-level security context ─────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 3000
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: secure-app
+          # Jenkins replaces IMAGE_PLACEHOLDER with:
+          # localhost:5000/secure-app:<build>-<commit>
+          image: IMAGE_PLACEHOLDER
+          # Always pull ensures we get the freshly pushed image
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+
+          # ── Container-level security context ──────────────────────
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+
+          # ── Resource limits (required by Kyverno policy) ──────────
+          # Reduced for local laptop — adjust based on your machine
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+
+          # ── Environment from Secret and ConfigMap ─────────────────
+          envFrom:
+            - secretRef:
+                name: secure-app-secret
+            - configMapRef:
+                name: secure-app-config
+
+          # ── Health probes ─────────────────────────────────────────
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          # ── Writable tmp for read-only filesystem ─────────────────
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+---
+# ─── Service ──────────────────────────────────────────────────────────────────
+# NodePort type so minikube service command can give a direct URL
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-app-svc
+  namespace: secure-app
+spec:
+  selector:
+    app: secure-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30080       # Access via: minikube ip:30080
+  type: NodePort
+---
+# ─── ConfigMap ────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: secure-app-config
+  namespace: secure-app
+data:
+  APP_ENV: "local"
+  LOG_LEVEL: "info"
+  PORT: "8080"
+---
+# ─── NetworkPolicy ────────────────────────────────────────────────────────────
+# Note: Minikube supports NetworkPolicy only with Calico CNI plugin
+# For demo, this is kept as-is to show the policy definition
+# If using default minikube CNI, policies are defined but not enforced
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: secure-app-netpol
+  namespace: secure-app
+spec:
+  podSelector:
+    matchLabels:
+      app: secure-app
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 53      # Allow DNS
