@@ -1,0 +1,16 @@
+# .gitleaks.toml
+# Gitleaks configuration for secure-app demo project
+# Suppresses known false positives in dissertation demo code
+
+title = "Gitleaks Config — secure-app"
+
+[allowlist]
+  description = "Allowlist for demo project"
+  paths = [
+    '''k8s/manifests/sealed-secret.yaml''',
+    '''VIVA_QA.md''',
+  ]
+  # Ignore the demo AWS key shown in viva Q&A doc (it's a fake example key)
+  regexes = [
+    '''AKIAIOSFODNN7EXAMPLE''',
+  ]
