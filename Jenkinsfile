@@ -42,13 +42,15 @@ pipeline {
         // ─── Stage 2: Static Code Analysis (SonarQube) ───────────────
         stage('Static Code Analysis') {
             steps {
-                def scannerHome = tool 'SonarScanner'
-                withSonarQubeEnv('SonarQube') {
-                   sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                      -Dsonar.projectKey=${IMAGE_NAME} \
-                      -Dsonar.sources=.
-                    """
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=${IMAGE_NAME} \
+                              -Dsonar.sources=.
+                        """
+                    }
                 }
             }
         }
