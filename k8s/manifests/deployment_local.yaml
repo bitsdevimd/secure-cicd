@@ -56,7 +56,9 @@ spec:
         - name: secure-app
           # Jenkins replaces IMAGE_PLACEHOLDER with:
           # localhost:5000/secure-app:<build>-<commit>
-          image: IMAGE_PLACEHOLDER
+          #image: IMAGE_PLACEHOLDER
+          #********Policy Violation:disallow-latest-tag*******
+          image: nginx:latest
           # Always pull ensures we get the freshly pushed image
           imagePullPolicy: Always
 
