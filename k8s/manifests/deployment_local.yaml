@@ -45,7 +45,7 @@ spec:
 
       # ── Pod-level security context ─────────────────────────────────
       securityContext:
-        runAsNonRoot: true
+        # runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 3000
         fsGroup: 2000
@@ -69,12 +69,12 @@ spec:
           # ── Container-level security context ──────────────────────
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            # readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
-            capabilities:
-              drop:
-                - ALL
+            # capabilities:
+            #   drop:
+            #     - ALL
 
           # ── Resource limits (required by Kyverno policy) ──────────
           # Reduced for local laptop — adjust based on your machine
