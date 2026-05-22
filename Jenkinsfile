@@ -211,12 +211,14 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: "${KUBECONFIG_CRED}"]) {
                     sh """
-                        POD=\$(kubectl get pod -n secure-app -l app=secure-app \
-                          -o jsonpath='{.items[0].metadata.name}')
-                        echo "Testing pod: \$POD"
-                        kubectl exec -n secure-app \$POD -- \
-                          wget -qO- http://localhost:8080/health || true
-                    """
+                    POD=\$(kubectl get pod -n secure-app -l app=secure-app \
+                      --insecure-skip-tls-verify \
+                      -o jsonpath='{.items[0].metadata.name}')
+                    echo "Testing pod: \$POD"
+                    kubectl exec -n secure-app \$POD \
+                      --insecure-skip-tls-verify -- \
+                      wget -qO- http://localhost:8080/health || true
+                  """
                 }
             }
         }
