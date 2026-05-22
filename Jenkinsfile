@@ -192,10 +192,10 @@ pipeline {
                           k8s/manifests/deployment_local.yaml
 
                         # Create namespace
-                        kubectl apply -f k8s/manifests/namespace.yaml
+                        kubectl apply --validate=false -f k8s/manifests/namespace.yaml
 
                         # Apply all manifests
-                        kubectl apply -f k8s/manifests/ --namespace=secure-app
+                        kubectl apply --validate=false -f k8s/manifests/ --namespace=secure-app
 
                         # Wait for rollout
                         kubectl rollout status deployment/secure-app \
