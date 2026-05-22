@@ -189,7 +189,7 @@ pipeline {
                     sh """
                         # Replace image placeholder with actual image
                         sed -i 's|IMAGE_PLACEHOLDER|${FULL_IMAGE}|g' \
-                          k8s/manifests/deployment.yaml
+                          C:/Users/madheshwarand/k8s/policies/kyverno-policies.yaml
 
                         # Create namespace
                         kubectl apply -f k8s/manifests/namespace.yaml
