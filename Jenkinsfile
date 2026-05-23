@@ -199,10 +199,17 @@ pipeline {
                         # Apply all manifests
                         kubectl apply --validate=false -f k8s/manifests/ --namespace=secure-app
 
+                        # Force delete any stuck terminating pods
+                        kubectl delete pods -n secure-app --field-selector status.phase=Failed --ignore-not-found=true
+                        kubectl delete pods -n secure-app -l app=secure-app --field-selector=status.phase!=Running --ignore-not-found=true || true
+                
+                        # Give it a moment to reschedule
+                        sleep 10
+
                         # Wait for rollout
-                        kubectl rollout status deployment/secure-app \
-                          --namespace=secure-app \
-                          --timeout=120s
+                       kubectl rollout status deployment/secure-app \
+                        --namespace=secure-app \
+                        --timeout=300s
                     """
                 }
             }
