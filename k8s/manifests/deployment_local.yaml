@@ -60,6 +60,7 @@ spec:
           #********Policy Violation:disallow-latest-tag*******
           #image: nginx:latest
           # Always pull ensures we get the freshly pushed image
+          command: ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "app:app"] 
           imagePullPolicy: Always
 
           ports:
