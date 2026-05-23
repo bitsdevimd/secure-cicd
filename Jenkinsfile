@@ -187,10 +187,12 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: "${KUBECONFIG_CRED}"]) {
                     sh """
+                       # Reset file to original before replacing placeholder
+                        git checkout k8s/manifests/deployment_local.yaml
+        
                         # Replace image placeholder with actual image
-                       sed -i 's|IMAGE_PLACEHOLDER|${FULL_IMAGE}|g' \
-                          k8s/manifests/deployment_local.yaml
-
+                        sed -i 's|IMAGE_PLACEHOLDER|${FULL_IMAGE}|g' k8s/manifests/deployment_local.yaml
+        
                         # Create namespace
                         kubectl apply --validate=false -f k8s/manifests/namespace.yaml
 
