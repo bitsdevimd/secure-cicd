@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "main", "feature/**" ]
+    branches: [ "main", "feature-github-actions-test" ]
   pull_request:
     branches: [ "main" ]
 
