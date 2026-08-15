@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: bitsdevimd/secure-cicd
+  IMAGE_NAME: devibits/secure-cicd
   REGISTRY: docker.io
 
 jobs:
