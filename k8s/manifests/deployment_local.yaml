@@ -54,9 +54,9 @@ spec:
 
       containers:
         - name: secure-app
-          # Jenkins replaces IMAGE_PLACEHOLDER with:
+          # Jenkins replaces docker.io/devibits/secure-cicd:7abea932f45865b86c968abc63fc8f59d85c26fd with:
           # localhost:5000/secure-app:<build>-<commit>
-          image: IMAGE_PLACEHOLDER
+          image: docker.io/devibits/secure-cicd:7abea932f45865b86c968abc63fc8f59d85c26fd
           #********Policy Violation:disallow-latest-tag*******
           #image: nginx:latest
           # Always pull ensures we get the freshly pushed image
